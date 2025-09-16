@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { submitLead } from "@/lib/lead";
+import { notifyLead, utmFromLocation } from "@/lib/notifyLead";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +22,13 @@ const ConversionForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await submitLead(formData as any);
+    try {
+      const page_url = typeof window !== 'undefined' ? window.location.href : '';
+      const payload = { ...formData, page_url, ...utmFromLocation() } as any;
+      notifyLead('contact', payload);
+    } catch (e) {
+      console.warn('notifyLead skipped', e);
+    }
     console.log("Form submitted:", formData);
   };
 
